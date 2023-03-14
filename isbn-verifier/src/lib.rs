@@ -10,7 +10,7 @@ pub fn is_valid_isbn(isbn: &str) -> bool {
                 iterator = iterator + 1;
             }
             'X' if iterator == 9 => {
-                check = check + 10; 
+                check = check + 10;
                 iterator = iterator + 1;
             }
             '-' => {
@@ -22,9 +22,6 @@ pub fn is_valid_isbn(isbn: &str) -> bool {
             }
         }
     }
-    if check % 11 == 0 && iterator == 10 {
-        true
-    } else {
-        false
-    }
+
+    check % 11 == 0
 }
