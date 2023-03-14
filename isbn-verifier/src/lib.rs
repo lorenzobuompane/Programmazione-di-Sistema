@@ -2,25 +2,27 @@
 pub fn is_valid_isbn(isbn: &str) -> bool {
     let mut check = 0;
     let mut iterator = 0;
-    let chars  = isbn.chars();
+    let chars = isbn.chars();
     for i in chars {
-        match i.is_numeric() {
-            true => {
+        match i {
+            '0'..='9' => {
                 check = check + (10 - iterator) * i.to_digit(10).unwrap();
                 iterator = iterator + 1;
-            },
-            false if i == 'X' && iterator == 9 => {     // X value only in last position
-                check = check + (10 - iterator) * 10;
+            }
+            'X' if iterator == 9 => {
+                check = check + 10; 
                 iterator = iterator + 1;
-            },
-            false if i == 'X' => {
-                check = 12;     // invalid position of X => check=12 for enforce return false
+            }
+            '-' => {
+                continue;
+            }
+            _ => {
+                check = 12;
                 break;
             }
-            _ => continue,
         }
     }
-    if check%11 == 0 && iterator == 10{
+    if check % 11 == 0 && iterator == 10 {
         true
     } else {
         false
