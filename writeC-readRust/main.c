@@ -54,15 +54,15 @@ int main() {
                 break;
             }
         }
+        printf("size of %d iteration: %d\n", i, sizeof(vec[i]));
     }
     FILE *pf = fopen("input_for_rust.bin", "wb");
     if (pf == NULL) {
         printf("Error in opening file!\n");
         return -1;
     }
-    printf("main pre export\n");
-    export(vec, 100, pf);
-    printf("main post export\n");
+    //export(vec, 100, pf);
+    printf("\nsize of all datas: %d\n", sizeof(vec));
     return 0;
 }
 
