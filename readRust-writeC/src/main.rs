@@ -1,27 +1,64 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Seek, SeekFrom};
 use std::mem::{ManuallyDrop};
 use std::process::exit;
 use clap::Parser;
 use std::string::String;
-use std::str;
 
 // int: i32; float: f32; long: i32
 struct ValueStruct {
     struct_type: i32,
-    val: i32,
+    val: f32,
     timestamp: i32
+}
+impl ValueStruct {
+    pub fn create(struct_type: i32, val: f32, timestamp: i32, datas: &mut Vec<CData>){
+        let value = ValueStruct{struct_type, val, timestamp};
+        let mdrop = ManuallyDrop::new(value);
+        let data = CData{struct_type, data: DataType{value: mdrop}};
+        // push
+        datas.push(data);
+    }
+    pub fn print(data_number: usize, value: &ValueStruct) {
+        println!("Data # {} -> type: {}, val: {}, timestamp: {}", data_number, value.struct_type, value.val, value.timestamp);
+    }
 }
 
 struct MValueStruct {
     struct_type: i32,
-    val: Vec<i32>,
+    val: Vec<f32>,
     timestamp: i32
+}
+
+impl MValueStruct {
+    pub fn create(struct_type: i32, vals: Vec<f32>, timestamp: i32, datas: &mut Vec<CData>) {
+        let mvalue = MValueStruct{struct_type, val: vals, timestamp};
+        let mdrop = ManuallyDrop::new(mvalue);
+        let data = CData{struct_type, data: DataType{mvalue: mdrop}};
+        // push
+        datas.push(data);
+    }
+    pub fn print(data_number: usize, mvalue: &MValueStruct) {
+        println!("Data # {} -> type: {}, val_vec: {:?}, timestamp: {}", data_number, mvalue.struct_type, mvalue.val, mvalue.timestamp);
+    }
 }
 
 struct MessageStruct {
     struct_type: i32,
     message: String
+}
+
+impl MessageStruct {
+    pub fn create(struct_type: i32, message: String, datas: &mut Vec<CData>) {
+        let mes = MessageStruct{struct_type, message};
+        let mdrop = ManuallyDrop::new(mes);
+        let data = CData{struct_type, data: DataType{message: mdrop}};
+        // push
+        datas.push(data);
+    }
+    pub fn print(data_number: usize, message: &MessageStruct) {
+        println!("Data # {} -> type: {}, message: {}", data_number, message.struct_type, message.message);
+    }
 }
 
 union DataType {
@@ -32,12 +69,12 @@ union DataType {
 
 struct CData {
     struct_type: i32,
-    data: DataType
+    pub data: DataType
 }
 
 impl CData {
-    fn from_file(file: &mut File) -> Vec<CData> {
-        let mut datas: Vec<CData> = Vec::with_capacity(100);
+    fn from_file(file: &mut File, datas: &mut Vec<CData>) /*-> Vec<CData>*/ {
+
         let mut tmp_type: i32;
 
         let mut i32_buffer = [0u8; 4];         // buffer for i32
@@ -48,58 +85,65 @@ impl CData {
             tmp_type = i32::from_le_bytes(i32_buffer);
             // match type
             match tmp_type {
+                // in file there are 48 bytes save for one ExportData union struct
+                // in type 1 we read 12 bytes so must skip 36 bytes
+                // in type 2 we read 48 bytes so no skip
+                // in type 3 we read 25 bytes so must skip 23 bytes
                 1 => {
                     // read
+                    bytes_read = file.read( &mut i32_buffer);   // type
                     bytes_read = file.read( &mut i32_buffer);
-                    let val = i32::from_le_bytes(i32_buffer);
+                    let val = f32::from_le_bytes(i32_buffer);
                     bytes_read = file.read( &mut i32_buffer);
                     let timestamp = i32::from_le_bytes(i32_buffer);
                     // create correct struct
-                    let value = ValueStruct{struct_type: tmp_type, val, timestamp};
-                    let mdrop = ManuallyDrop::new(value);
-                    let data = CData{struct_type:tmp_type, data: DataType{value: mdrop}};
-                    // push
-                    datas.push(data);
+
+                    ValueStruct::create(tmp_type, val, timestamp, datas);
+
+                    file.seek(SeekFrom::Current(36)).expect("skip type 1");
                 },
                 2 => {
                     // read
-                    let mut vals: Vec<i32> = Vec::with_capacity(10);
+                    bytes_read = file.read( &mut i32_buffer);   // type
+                    let mut vals: Vec<f32> = Vec::with_capacity(10);
                     for j in 0 .. 10 {
                         bytes_read = file.read( &mut i32_buffer);
-                        let val = i32::from_le_bytes(i32_buffer);
+                        let val = f32::from_le_bytes(i32_buffer);
                         vals.push(val);
                     }
                     bytes_read = file.read( &mut i32_buffer);
                     let timestamp = i32::from_le_bytes(i32_buffer);
                     // create correct struct
-                    let mvalue = MValueStruct{struct_type: tmp_type, val: vals, timestamp};
-                    let mdrop = ManuallyDrop::new(mvalue);
-                    let data = CData{struct_type:tmp_type, data: DataType{mvalue: mdrop}};
-                    // push
-                    datas.push(data);
+
+                    MValueStruct::create(tmp_type, vals, timestamp, datas);
                 }
                 3 => {
+                    bytes_read = file.read( &mut i32_buffer);   // type
                     // read string
-                    let mut msg_in_bytes:Vec<u8> = Vec::with_capacity(21);
+                    let mut msg_in_bytes:Vec<char> = Vec::with_capacity(21);
                     for j in 0 .. 21 {
                         bytes_read = file.read( &mut char_buffer);
-                        let val = u8::from_le_bytes(char_buffer);
-                        msg_in_bytes.push(val);
+                        //let val = u8::from_le_bytes(char_buffer);
+                        if char_buffer[0] == 0 {
+                            file.seek(SeekFrom::Current(21-j-1)).expect("skip type 3");
+                            break;
+                        }
+                        let val_char = char::from(char_buffer[0]);
+                        msg_in_bytes.push(val_char);
                     }
-                    let message= str::from_utf8(&msg_in_bytes).unwrap().to_string();
+                    //let message= str::from_utf8(&msg_in_bytes).unwrap().to_string();
+                    let message = msg_in_bytes.iter().collect();
                     // create correct struct
-                    let mes = MessageStruct{struct_type: tmp_type, message};
-                    let mdrop = ManuallyDrop::new(mes);
-                    let data = CData{struct_type:tmp_type, data: DataType{message: mdrop}};
-                    // push
-                    datas.push(data);
+                    MessageStruct::create(tmp_type, message, datas);
+
+                    file.seek(SeekFrom::Current(23)).expect("skip type 3");
                 }
                 _ => {
-                    println!("Error in reading type");
+                    println!("Error in reading type {}", i);
                 }
             }
             }
-        datas
+        /*datas*/
     }
 }
 #[derive(Parser)]
@@ -111,7 +155,7 @@ struct Args{
 
 fn main() {
     let args = Args::parse();
-    let mut open = File::open(args.path);
+    let open = File::open(args.path);
     let mut file;
     if open.is_ok() {
         file = open.unwrap();
@@ -120,46 +164,25 @@ fn main() {
         exit(1);
     }
 
-    let import = CData::from_file(&mut file);
-
-        /*for i in 0..100 {
-            match import[i].struct_type {
+    let mut datas: Vec<CData> = Vec::new();
+    CData::from_file(&mut file, &mut datas);
+    unsafe {
+        for i in 0..100 {
+            match datas[i].struct_type {
                 1 => {
-                    println!("Data # {} -> type: {}, val: {}, timestamp: {}", i + 1, import[i].data.value.struct_type, import[i].data.value.val, import[i].data.value.timestamp)
+                    ValueStruct::print(i + 1, &datas[i].data.value);
                 },
                 2 => {
-                    println!("Data # {} -> type: {}, val_vec: {:?}, timestamp: {}", i + 1, import[i].data.mvalue.struct_type, import[i].data.mvalue.val, import[i].data.mvalue.timestamp)
+                    MValueStruct::print(i + 1, &datas[i].data.mvalue);
                 }
                 3 => {
-                    println!("Data # {} -> type: {}, val: {}, timestamp: {}", i + 1, import[i].data.value.struct_type, import[i].data.value.val, import[i].data.value.timestamp)
+                    MessageStruct::print(i + 1, &datas[i].data.message);
                 }
                 _ => {
                     println!("Error in printing");
                 }
-            }*/
-
-
-
-    //print_datas(&import);
-
-}
-/*
-fn print_datas(datas: &Vec<CData>) {
-    for i in 0..100 {
-        match datas[i].struct_type {
-            1 => {
-                println!("Data # {} -> type: {}, val: {}, timestamp: {}", i + 1, datas[i].data.value.struct_type, datas[i].data.value.val, datas[i].data.value.timestamp)
-            },
-            2 => {
-                println!("Data # {} -> type: {}, val_vec: {:?}, timestamp: {}", i + 1, datas[i].data.mvalue.struct_type, datas[i].data.mvalue.val, datas[i].data.mvalue.timestamp)
             }
-            3 => {
-                println!("Data # {} -> type: {}, val: {}, timestamp: {}", i + 1, datas[i].data.value.struct_type, datas[i].data.value.val, datas[i].data.value.timestamp)
-            }
-            _ => {
-                println!("Error in printing");
-            }
+            println!("------------------------------------------------------------------");
         }
     }
-}*/
-
+}

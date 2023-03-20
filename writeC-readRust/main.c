@@ -50,18 +50,46 @@ int main() {
             }
             case 3: {       // MESSAGE
                 vec[i].messages.type=3;
-                sprintf(vec[i].messages.message, "Hello World: %d\n", rand()%10);
+                sprintf(vec[i].messages.message, "Hello World: %d", rand()%10);
                 break;
             }
         }
         printf("size of %d iteration: %d\n", i, sizeof(vec[i]));
     }
+
+    // for DEBUG
+    /*for (int i=0; i<100; i++) {
+        vec[i].type = i%3 + 1;
+        switch (vec[i].type) {
+            case 1: {       // VALUE
+                vec[i].val.type=1;
+                vec[i].val.val=(float) 1;
+                vec[i].val.timestamp=(long) 1;
+                break;
+            }
+            case 2: {       // MVALUE
+                vec[i].mvals.type=2;
+                for (int j=0; j<10; j++) {
+                    vec[i].mvals.val[j]=(float) 2;
+                }
+                vec[i].mvals.timestamp=(long) 2;
+                break;
+            }
+            case 3: {       // MESSAGE
+                vec[i].messages.type=3;
+                sprintf(vec[i].messages.message, "Hello World: %d", 3);
+                break;
+            }
+        }
+        printf("size of %d iteration: %d\n", i, sizeof(vec[i]));
+    }*/
+
     FILE *pf = fopen("input_for_rust.bin", "wb");
     if (pf == NULL) {
         printf("Error in opening file!\n");
         return -1;
     }
-    //export(vec, 100, pf);
+    export(vec, 100, pf);
     printf("\nsize of all datas: %d\n", sizeof(vec));
     return 0;
 }
