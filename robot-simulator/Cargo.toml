@@ -2,3 +2,6 @@
 edition = "2021"
 name = "robot-simulator"
 version = "2.2.0"
+
+[dependencies]
+clap = { version = "4.1.13", features = ["derive"] }
