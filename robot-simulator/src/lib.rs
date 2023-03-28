@@ -11,6 +11,18 @@ pub enum Direction {
     West,
 }
 
+impl From<usize> for Direction {
+    fn from(value: usize) -> Self {
+        match value%4 {
+            0 => Direction::North,
+            1 => Direction::East,
+            2 => Direction::South,
+            3 => Direction::West,
+            _ => unreachable!()
+        }
+    }
+}
+
 pub struct Robot {
     x: i32,
     y: i32,
@@ -24,38 +36,24 @@ impl Robot {
 
     #[must_use]
     pub fn turn_right(self) -> Self {
-        let mut robot = self;
-        match robot.direction() {
-            Direction::North => robot = Robot::new(robot.x, robot.y, Direction::East),
-            Direction::South => robot = Robot::new(robot.x, robot.y, Direction::West),
-            Direction::East => robot = Robot::new(robot.x, robot.y, Direction::South),
-            Direction::West => robot = Robot::new(robot.x, robot.y, Direction::North),
-        };
-        robot
+        let d=self.d as usize;
+        Robot { d: Direction::from( d+ 1 ), ..self }
     }
 
     #[must_use]
     pub fn turn_left(self) -> Self {
-        let mut robot = self;
-        match robot.direction() {
-            Direction::North => robot = Robot::new(robot.x, robot.y, Direction::West),
-            Direction::South => robot = Robot::new(robot.x, robot.y, Direction::East),
-            Direction::East => robot = Robot::new(robot.x, robot.y, Direction::North),
-            Direction::West => robot = Robot::new(robot.x, robot.y, Direction::South),
-        };
-        robot
+        let d=self.d as usize;
+        Robot { d: Direction::from(d + 3 ), ..self }
     }
 
     #[must_use]
     pub fn advance(self) -> Self {
-        let mut robot = self;
-        match robot.direction() {
-            Direction::North => robot = Robot::new(robot.x, robot.y + 1, Direction::North),
-            Direction::South => robot = Robot::new(robot.x, robot.y - 1, Direction::South),
-            Direction::East => robot = Robot::new(robot.x + 1, robot.y, Direction::East),
-            Direction::West => robot = Robot::new(robot.x - 1, robot.y, Direction::West),
-        };
-        robot
+        match self.direction() {
+            Direction::North => Robot { y: self.y + 1, ..self },
+            Direction::East => Robot { x: self.x + 1, ..self },
+            Direction::South => Robot { y: self.y - 1, ..self },
+            Direction::West => Robot { x: self.x - 1, ..self },
+        }
     }
 
     #[must_use]
