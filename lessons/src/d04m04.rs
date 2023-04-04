@@ -18,13 +18,21 @@ fn create_function2(even: bool, base: i32) -> Box<dyn Fn(i32) -> i32> {
     };
 }
 
+fn generator(base: &str) -> impl FnMut() -> String + '_ {
+    let mut x = 0;
+    return move || {
+        x += 1;
+        format!("{}{}", base, x)
+    };
+}
+
 pub fn d04m04() {
     println!("---- Lesson 04/04 ----");
     let f1 = create_function1(true);
     for i in 0..10 {
         println!("f1({}): {}", i, f1(i));
     }
-    println!("------------------------------------------------");
+    println!();
     let f2 = create_function1(false);
     for i in 0..10 {
         println!("f2({}): {}", i, f2(i));
@@ -34,10 +42,24 @@ pub fn d04m04() {
     for i in 0..10 {
         println!("f3({}): {}", i, (*f3)(i));
     }
-    println!("------------------------------------------------");
+    println!();
     let f4 = create_function2(false, 200);
     for i in 0..10 {
         println!("f4({}): {}", i, (*f4)(i));
     }
+    println!("------------------------------------------------");
+    let mut g = generator("alfa");
+    println!("{}", g());
+    println!("{}", g());
+    println!("{}", g());
+    println!("{}", g());
+    println!("{}", g());
+    println!();
+    let mut h = generator("beta");
+    println!("{}", h());
+    println!("{}", h());
+    println!("{}", h());
+    println!("{}", h());
+    println!("{}", g());
     println!("------------------------------------------------");
 }
