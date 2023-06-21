@@ -10,7 +10,7 @@ fn with_iter() {
     println!("------------------------------------");
 }
 
-fn with_intoiter() {
+fn with_into_iter() {
     println!("into_iter()");
     let v = vec!["a", "b", "c"];
 
@@ -45,7 +45,7 @@ fn with_iter_struct() {
     println!("------------------------------------");
 }
 
-fn with_intoiter_struct() {
+fn with_into_iter_struct() {
     println!("struct()");
     let v = vec![T(1), T(2), T(3)];
 
@@ -59,7 +59,7 @@ fn with_intoiter_struct() {
     println!("------------------------------------");
 }
 
-fn with_intoiter_struct_break() {
+fn with_into_iter_struct_break() {
     println!("struct()");
     let v = vec![T(1), T(2), T(3)];
 
@@ -78,8 +78,8 @@ fn with_intoiter_struct_break() {
 pub fn d25m05() {
     println!("---- Lesson 25/04 ----");
     with_iter();
-    with_intoiter();
+    with_into_iter();
     with_iter_struct();
-    with_intoiter_struct();
-    with_intoiter_struct_break();
+    with_into_iter_struct();
+    with_into_iter_struct_break();
 }
