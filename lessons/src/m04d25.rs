@@ -75,7 +75,7 @@ fn with_into_iter_struct_break() {
     println!("------------------------------------");
 }
 
-pub fn d25m05() {
+pub fn m04d25() {
     println!("---- Lesson 25/04 ----");
     with_iter();
     with_into_iter();

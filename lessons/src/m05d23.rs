@@ -1,7 +1,6 @@
 use std::sync::{Arc, Condvar, Mutex};
 use std::sync::mpsc::channel;
 use std::thread;
-use std::thread::Thread;
 use std::time::Duration;
 
 fn cvar_print_new_data() {
@@ -40,7 +39,7 @@ fn cvar_print_new_data() {
     t.join().unwrap();
 }
 
-fn chanell_print_new_data() {
+fn chanel_print_new_data() {
     let (tx, rx) = channel();
     let t1 = thread::spawn(move || {
         for i in 0..10 {
@@ -55,8 +54,10 @@ fn chanell_print_new_data() {
     t1.join().unwrap();
 }
 
-pub fn d23m05() {
+pub fn m05d23() {
     println!("---- Lesson 23/05 ----");
-    // cvar_print_new_data();
-    chanell_print_new_data();
+    println!("### condition variable ###");
+    cvar_print_new_data();
+    println!("### channel ###");
+    chanel_print_new_data();
 }

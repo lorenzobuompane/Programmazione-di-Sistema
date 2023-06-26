@@ -26,7 +26,7 @@ fn generator(base: &str) -> impl FnMut() -> String + '_ {
     };
 }
 
-pub fn d04m04() {
+pub fn m04d04() {
     println!("---- Lesson 04/04 ----");
     let f1 = create_function1(true);
     for i in 0..10 {

@@ -1,13 +1,13 @@
-mod d04m04;
-mod d25m04;
-mod d08m05;
-mod d09m05;
-mod d23m05;
+mod m04d04;
+mod m04d25;
+mod m05d08;
+mod m05d09;
+mod m05d23;
 
 fn main() {
-    // crate::d04m04::d04m04();
-    // crate::d25m04::d25m05();
-    // crate::d08m05::d08m05();
-    // crate::d09m05::d09m05();
-    crate::d23m05::d23m05();
+    crate::m04d04::m04d04();
+    crate::m04d25::m04d25();
+    crate::m05d08::m05d08();
+    crate::m05d09::m05d09();
+    crate::m05d23::m05d23();
 }

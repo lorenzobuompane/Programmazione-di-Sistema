@@ -27,7 +27,7 @@ fn verify_casual_schedule_order(n: usize) {
 }
 
 
-pub fn d08m05() {
+pub fn m05d08() {
     println!("---- Lesson 08/05 ----");
     verify_casual_schedule_order(3);
 }

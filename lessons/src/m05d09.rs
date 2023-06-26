@@ -24,7 +24,7 @@ fn scope_fun() {
     }
 }
 
-pub fn d09m05() {
+pub fn m05d09() {
     println!("---- Lesson 08/05 ----");
     scope_fun();
 }
